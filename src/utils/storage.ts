@@ -1,8 +1,10 @@
-import { GameStats } from '../types/game';
+import { GameStats, GameConfig, FullGameData, GameStateExtended } from '../types/game';
 
 const STATS_KEY = 'veiculooo-stats';
 const GAME_STATE_KEY = 'veiculooo-game-state';
 const LAST_PLAYED_KEY = 'veiculooo-last-played';
+const FULL_GAME_DATA_KEY = 'veiculooo-full-data';
+const CONFIG_KEY = 'veiculooo-config';
 
 export const loadStats = (): GameStats => {
   const stored = localStorage.getItem(STATS_KEY);
@@ -61,4 +63,87 @@ export const isNewDay = (): boolean => {
   const lastPlayed = getLastPlayedDate();
   const today = new Date().toDateString();
   return lastPlayed !== today;
+};
+
+// Funções para o novo sistema completo de storage
+
+export const loadConfig = (): GameConfig => {
+  const stored = localStorage.getItem(CONFIG_KEY);
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  return {
+    highContrast: false,
+    hardMode: false,
+    hintsEnabled: true,
+  };
+};
+
+export const saveConfig = (config: GameConfig): void => {
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+};
+
+export const getCurrentDay = (): number => {
+  const today = new Date();
+  const start = new Date('2025-01-01');
+  return Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+};
+
+export const loadFullGameData = (): FullGameData => {
+  const stored = localStorage.getItem(FULL_GAME_DATA_KEY);
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  
+  // Retorna estrutura inicial
+  return {
+    config: loadConfig(),
+    meta: {
+      startTime: Date.now(),
+      endTime: null,
+      curday: getCurrentDay(),
+    },
+    stats: loadStats(),
+    state: [],
+  };
+};
+
+export const saveFullGameData = (data: FullGameData): void => {
+  localStorage.setItem(FULL_GAME_DATA_KEY, JSON.stringify(data));
+};
+
+export const saveGameStateExtended = (_mode: string, state: GameStateExtended): void => {
+  const fullData = loadFullGameData();
+  
+  // Atualiza ou adiciona o estado do jogo específico
+  const existingIndex = fullData.state.findIndex(s => s.solution === state.solution);
+  if (existingIndex >= 0) {
+    fullData.state[existingIndex] = state;
+  } else {
+    fullData.state.push(state);
+  }
+  
+  fullData.meta.curday = getCurrentDay();
+  saveFullGameData(fullData);
+};
+
+export const loadGameStateExtended = (solution: string): GameStateExtended | null => {
+  const fullData = loadFullGameData();
+  const state = fullData.state.find(s => s.solution === solution);
+  return state || null;
+};
+
+export const initializeGameStateExtended = (solution: string): GameStateExtended => {
+  return {
+    solution,
+    normSolution: solution.toUpperCase(),
+    tries: [],
+    invalids: [],
+    curRow: 0,
+    curTry: [],
+    gameOver: false,
+    won: null,
+    hintsUsed: 0,
+    revealedLetters: [],
+  };
 };

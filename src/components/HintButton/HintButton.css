@@ -1,0 +1,73 @@
+.hint-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin: 10px auto;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 
+    0 2px 4px rgba(243, 156, 18, 0.3),
+    0 4px 8px rgba(243, 156, 18, 0.2),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.hint-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 6px rgba(243, 156, 18, 0.4),
+    0 6px 12px rgba(243, 156, 18, 0.3),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.hint-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 
+    0 1px 2px rgba(243, 156, 18, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.hint-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.hint-icon {
+  font-size: 1.2rem;
+}
+
+.hint-text {
+  letter-spacing: 0.02em;
+}
+
+.hint-count {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .hint-button {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .hint-icon {
+    font-size: 1.1rem;
+  }
+}
+
