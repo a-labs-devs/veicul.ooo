@@ -28,7 +28,8 @@ const Game: React.FC<GameProps> = ({
   const [extendedState, setExtendedState] = useState<GameStateExtended>(() => {
     const target = targetWord || getDailyWord();
     const saved = loadGameStateExtended(target);
-    if (saved) {
+    
+    if (saved && saved.solution === target) {
       return saved;
     }
     return initializeGameStateExtended(target);
@@ -37,8 +38,7 @@ const Game: React.FC<GameProps> = ({
   const [gameState, setGameState] = useState<GameState>(() => {
     const target = targetWord || getDailyWord();
     const saved = loadGameStateExtended(target);
-    
-    if (saved && saved.tries.length > 0) {
+    if (saved && saved.solution === target && saved.tries.length > 0) {
       const guesses = saved.tries.map(tryWord => 
         createGuess(tryWord.join(''), target)
       );
