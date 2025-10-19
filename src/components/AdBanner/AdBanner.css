@@ -1,0 +1,131 @@
+.ad-banner-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 1vh;
+  background: transparent;
+  position: relative;
+}
+
+.ad-banner {
+  display: block;
+  width: 100%;
+  max-width: 728px;
+  min-height: 90px;
+}
+
+.ad-banner-fallback {
+  position: absolute;
+  width: 100%;
+  max-width: 728px;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.1), rgba(234, 67, 53, 0.1));
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.ad-fallback-text {
+  font-size: 1.6vh;
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.ad-banner-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 728px;
+  min-height: 90px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 2vh;
+  gap: 0.5vh;
+}
+
+.ad-placeholder-text {
+  font-size: 1.8vh;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.ad-placeholder-subtext {
+  font-size: 1.3vh;
+  color: rgba(255, 255, 255, 0.25);
+  font-weight: 400;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .ad-banner {
+    max-width: 100%;
+    min-height: 50px;
+  }
+
+  .ad-banner-fallback {
+    max-width: 100%;
+    min-height: 50px;
+  }
+
+  .ad-fallback-text {
+    font-size: 1.4vh;
+  }
+
+  .ad-banner-placeholder {
+    max-width: 100%;
+    min-height: 50px;
+    padding: 1.5vh;
+  }
+
+  .ad-placeholder-text {
+    font-size: 1.5vh;
+  }
+
+  .ad-placeholder-subtext {
+    font-size: 1.1vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .ad-banner-container {
+    padding: 0.3vh 0;
+  }
+
+  .ad-banner {
+    min-height: 50px;
+  }
+
+  .ad-banner-fallback {
+    min-height: 50px;
+  }
+
+  .ad-fallback-text {
+    font-size: 1.2vh;
+  }
+
+  .ad-banner-placeholder {
+    min-height: 50px;
+    padding: 1vh;
+  }
+
+  .ad-placeholder-text {
+    font-size: 1.3vh;
+  }
+
+  .ad-placeholder-subtext {
+    font-size: 1vh;
+  }
+}

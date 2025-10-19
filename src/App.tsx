@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import Header from './components/Header/Header';
 import Game from './components/Game/Game';
+import AdBanner from './components/AdBanner/AdBanner';
 import HelpModal from './components/HelpModal/HelpModal';
 import StatsModal from './components/StatsModal/StatsModal';
 import { loadStats } from './utils/storage';
@@ -24,7 +25,13 @@ const App: React.FC = () => {
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
       <StatsModal isOpen={showStats} onClose={() => setShowStats(false)} stats={loadStats()} />
       
-      <div className="footer"></div>
+      <footer className="footer">
+        <AdBanner 
+          adClient="ca-pub-4799413484554608"
+          adFormat="auto"
+          responsive={true}
+        />
+      </footer>
     </div>
   );
 };
