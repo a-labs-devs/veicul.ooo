@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './MultiGame.css';
 import Grid from '../Grid/Grid';
 import Keyboard from '../Keyboard/Keyboard';
-import { GameState, Guess } from '../../types/game';
+import ToastContainer from '../Toast/ToastContainer';
+import { GameState, Guess, GameStateExtended } from '../../types/game';
 import { getDailyWord, isValidWord, normalizeWord, WORDS } from '../../data/words';
 import { createGuess } from '../../utils/game';
-import { updateStats } from '../../utils/storage';
+import { updateStats, loadGameStateExtended, saveGameStateExtended, initializeGameStateExtended } from '../../utils/storage';
+import { useToast } from '../../hooks/useToast';
 
 interface MultiGameProps {
   gameCount: number;
@@ -13,6 +15,8 @@ interface MultiGameProps {
 }
 
 const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
+  const { toasts, removeToast, showSuccess, showError } = useToast();
+  
   const [games, setGames] = useState<GameState[]>(() => {
     // Generate multiple target words
     const targets: string[] = [];
@@ -39,6 +43,23 @@ const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
   const [allGuesses, setAllGuesses] = useState<Guess[]>([]);
   const wordLength = 5;
 
+  const [extendedStates, setExtendedStates] = useState<GameStateExtended[]>(() => {
+    return games.map(game => {
+      const saved = loadGameStateExtended(game.target);
+      if (saved && !saved.gameOver) {
+        return saved;
+      }
+      return initializeGameStateExtended(game.target);
+    });
+  });
+
+  // Salva os estados estendidos sempre que mudarem
+  useEffect(() => {
+    extendedStates.forEach(state => {
+      saveGameStateExtended('multi', state);
+    });
+  }, [extendedStates]);
+
   const allGamesFinished = games.every(g => g.gameStatus !== 'playing');
 
   const handleKeyPress = useCallback((key: string) => {
@@ -46,22 +67,43 @@ const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
 
     if (key === 'ENTER') {
       if (currentGuess.length !== wordLength) {
-        alert(`A palavra deve ter ${wordLength} letras!`);
+        showError(`A palavra deve ter ${wordLength} letras!`, 2000);
         return;
       }
 
       if (!isValidWord(currentGuess)) {
-        alert('Palavra não encontrada na lista!');
+        showError('Palavra não encontrada na lista!', 2000);
+        
+        // Adiciona às tentativas inválidas de todos os jogos
+        setExtendedStates(prev => prev.map(state => ({
+          ...state,
+          invalids: [...state.invalids, currentGuess],
+        })));
         return;
       }
 
       // Apply guess to all games
-      const newGames = games.map(game => {
+      const newGames = games.map((game, index) => {
         if (game.gameStatus !== 'playing') return game;
 
         const guess = createGuess(currentGuess, game.target);
         const newGuesses = [...game.guesses, guess];
         const isCorrect = normalizeWord(currentGuess) === normalizeWord(game.target);
+        
+        // Atualiza estado estendido deste jogo específico
+        const currentTry = currentGuess.split('');
+        setExtendedStates(prev => {
+          const newStates = [...prev];
+          newStates[index] = {
+            ...newStates[index],
+            tries: [...newStates[index].tries, currentTry],
+            curRow: newStates[index].curRow + 1,
+            curTry: [],
+            gameOver: isCorrect || newGuesses.length >= maxGuesses,
+            won: isCorrect ? true : (newGuesses.length >= maxGuesses ? false : null),
+          };
+          return newStates;
+        });
         
         let newStatus: 'playing' | 'won' | 'lost' = game.gameStatus;
         if (isCorrect) {
@@ -92,19 +134,31 @@ const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
         
         setTimeout(() => {
           if (allWon) {
-            alert('Parabéns! Você acertou todas as palavras! 🎉');
+            showSuccess('Parabéns! Você acertou todas as palavras! 🎉', 4000);
           } else {
             const lostGames = newGames.filter(g => g.gameStatus === 'lost');
-            alert(`Fim de jogo! Palavras não descobertas: ${lostGames.map(g => g.target).join(', ')}`);
+            const words = lostGames.map(g => g.target.toUpperCase()).join(', ');
+            showSuccess(`Palavras: ${words}`, 5000);
           }
         }, 500);
       }
+      // Se errou mas ainda tem tentativas, apenas avança silenciosamente
     } else if (key === '⌫' || key === 'BACKSPACE') {
-      setCurrentGuess(prev => prev.slice(0, -1));
+      const newGuess = currentGuess.slice(0, -1);
+      setCurrentGuess(newGuess);
+      setExtendedStates(prev => prev.map(state => ({
+        ...state,
+        curTry: newGuess.split(''),
+      })));
     } else if (currentGuess.length < wordLength) {
-      setCurrentGuess(prev => prev + key);
+      const newGuess = currentGuess + key;
+      setCurrentGuess(newGuess);
+      setExtendedStates(prev => prev.map(state => ({
+        ...state,
+        curTry: newGuess.split(''),
+      })));
     }
-  }, [games, currentGuess, allGuesses, wordLength, maxGuesses, allGamesFinished]);
+  }, [games, currentGuess, allGuesses, wordLength, maxGuesses, allGamesFinished, showSuccess, showError]);
 
   useEffect(() => {
     const handlePhysicalKeyPress = (e: KeyboardEvent) => {
@@ -125,6 +179,7 @@ const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
 
   return (
     <div className="multi-game">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
       <div className={`games-container games-${gameCount}`}>
         {games.map((game, index) => (
           <div key={index} className={`game-board ${game.gameStatus === 'won' ? 'won' : ''}`}>

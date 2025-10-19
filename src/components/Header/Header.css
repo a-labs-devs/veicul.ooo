@@ -5,6 +5,11 @@
   padding: 10px 20px;
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-bg);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.05),
+    0 4px 8px rgba(0, 0, 0, 0.03);
+  position: relative;
+  z-index: 10;
 }
 
 .header-left,
@@ -27,8 +32,12 @@
 
 .title {
   font-size: 1.8rem;
-  font-weight: bold;
+  font-weight: 800;
   letter-spacing: 0.05em;
+  background: linear-gradient(135deg, var(--color-text) 0%, var(--color-text) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .mode-selector {
@@ -37,22 +46,32 @@
 }
 
 .mode-button {
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: 8px 16px;
+  border-radius: 8px;
   background-color: transparent;
   color: var(--color-text);
   font-size: 0.9rem;
+  font-weight: 500;
   transition: all 0.2s ease;
   border: 2px solid transparent;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
 }
 
 .mode-button:hover {
   background-color: var(--color-empty);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
 .mode-button.active {
   border-color: var(--color-correct);
-  font-weight: bold;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(106, 170, 100, 0.1) 0%, rgba(90, 154, 84, 0.1) 100%);
+  box-shadow: 
+    0 2px 4px rgba(106, 170, 100, 0.2),
+    inset 0 1px 1px rgba(106, 170, 100, 0.1);
 }
 
 .icon-button {
@@ -61,12 +80,23 @@
   font-size: 1.5rem;
   padding: 8px;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
 }
 
 .icon-button:hover {
   background-color: var(--color-empty);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.icon-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 @media (max-width: 768px) {

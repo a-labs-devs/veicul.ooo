@@ -6,46 +6,190 @@
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-  font-weight: bold;
+  font-weight: 700;
   text-transform: uppercase;
   transition: all 0.3s ease;
+  border-radius: 4px;
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+/* Tile em linha futura (vazia, não ativa) */
 .tile-empty {
   background-color: var(--color-bg);
   color: var(--color-text);
+  border-color: rgba(211, 214, 218, 0.3);
+  opacity: 0.6;
+  box-shadow: none;
 }
 
+/* Tile na linha atual durante digitação */
+.tile.tile-current-row {
+  border-color: var(--color-text);
+  opacity: 1;
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Tile com letra na linha atual */
+.tile.tile-current-row.tile-has-letter {
+  animation: tilePopIn 0.15s ease-out;
+  border-color: var(--color-text);
+  border-width: 2.5px;
+  background-color: var(--color-bg);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  transform: scale(1);
+}
+
+/* Tile ativo (próximo a receber letra) */
+.tile.tile-active {
+  border-color: var(--color-text);
+  border-width: 3px;
+  background: linear-gradient(135deg, rgba(26, 26, 27, 0.03) 0%, rgba(26, 26, 27, 0.01) 100%);
+  box-shadow: 
+    0 0 0 2px rgba(26, 26, 27, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 4px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 3px rgba(255, 255, 255, 0.5);
+  animation: tilePulse 1.5s ease-in-out infinite;
+}
+
+/* Tile ativo na posição inicial (primeiro da linha) - efeito de "clique" */
+.tile.tile-active-first {
+  animation: tileClickFocus 0.4s ease-out, tilePulse 1.5s ease-in-out 0.4s infinite;
+}
+
+@keyframes tilePulse {
+  0%, 100% {
+    border-color: var(--color-text);
+    box-shadow: 
+      0 0 0 2px rgba(26, 26, 27, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.08),
+      0 4px 8px rgba(0, 0, 0, 0.05),
+      inset 0 1px 3px rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    border-color: rgba(26, 26, 27, 0.6);
+    box-shadow: 
+      0 0 0 2px rgba(26, 26, 27, 0.15),
+      0 2px 6px rgba(0, 0, 0, 0.12),
+      0 4px 10px rgba(0, 0, 0, 0.08),
+      inset 0 1px 3px rgba(255, 255, 255, 0.6);
+  }
+}
+
+@keyframes tileClickFocus {
+  0% {
+    transform: scale(1);
+    background: linear-gradient(135deg, rgba(26, 26, 27, 0.03) 0%, rgba(26, 26, 27, 0.01) 100%);
+  }
+  30% {
+    transform: scale(0.92);
+    background: linear-gradient(135deg, rgba(26, 26, 27, 0.08) 0%, rgba(26, 26, 27, 0.04) 100%);
+    box-shadow: 
+      0 0 0 3px rgba(26, 26, 27, 0.2),
+      inset 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+  60% {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, rgba(26, 26, 27, 0.05) 0%, rgba(26, 26, 27, 0.02) 100%);
+    box-shadow: 
+      0 0 0 4px rgba(26, 26, 27, 0.15),
+      0 4px 8px rgba(0, 0, 0, 0.1),
+      0 6px 12px rgba(0, 0, 0, 0.08),
+      inset 0 1px 3px rgba(255, 255, 255, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    background: linear-gradient(135deg, rgba(26, 26, 27, 0.03) 0%, rgba(26, 26, 27, 0.01) 100%);
+    box-shadow: 
+      0 0 0 2px rgba(26, 26, 27, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.08),
+      0 4px 8px rgba(0, 0, 0, 0.05),
+      inset 0 1px 3px rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Tiles de tentativas já submetidas (corretas, presentes ou ausentes) */
 .tile-correct {
-  background-color: var(--color-correct);
+  background: linear-gradient(135deg, #6aaa64 0%, #5a9a54 100%);
   border-color: var(--color-correct);
   color: white;
+  opacity: 1;
   animation: flip 0.5s ease;
+  box-shadow: 
+    0 3px 6px rgba(106, 170, 100, 0.4),
+    0 6px 12px rgba(106, 170, 100, 0.25),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .tile-present {
-  background-color: var(--color-present);
+  background: linear-gradient(135deg, #c9b458 0%, #b9a448 100%);
   border-color: var(--color-present);
   color: white;
+  opacity: 1;
   animation: flip 0.5s ease;
+  box-shadow: 
+    0 3px 6px rgba(201, 180, 88, 0.4),
+    0 6px 12px rgba(201, 180, 88, 0.25),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .tile-absent {
-  background-color: var(--color-absent);
+  background: linear-gradient(135deg, #787c7e 0%, #686c6e 100%);
   border-color: var(--color-absent);
   color: white;
+  opacity: 1;
   animation: flip 0.5s ease;
+  box-shadow: 
+    0 3px 6px rgba(120, 124, 126, 0.4),
+    0 6px 12px rgba(120, 124, 126, 0.25),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes flip {
   0% {
-    transform: rotateX(0deg);
+    transform: rotateX(0deg) translateZ(0);
   }
   50% {
-    transform: rotateX(90deg);
+    transform: rotateX(90deg) translateZ(8px);
   }
   100% {
-    transform: rotateX(0deg);
+    transform: rotateX(0deg) translateZ(0);
+  }
+}
+
+@keyframes tilePopIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tileBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
   }
 }
 

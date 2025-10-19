@@ -1,5 +1,5 @@
-// Lista de palavras relacionadas a carros (5 letras)
-export const WORDS = [
+// Lista de palavras relacionadas a carros (SOMENTE 5 letras)
+const ALL_WORDS = [
   // Modelos de carros
   'FUSCA', 'CIVIC', 'CORSA', 'PALIO', 'GOLFE', 'CELTA', 'KOMBI',
   'ONIX', 'TUCSON', 'KICKS', 'ARGO', 'MOBI', 'SPIN', 'COBALT',
@@ -22,6 +22,9 @@ export const WORDS = [
   'PISTA', 'CURVA', 'RETA', 'ESTRADA', 'ASFALTO', 'GARAGEM',
   'VAGA', 'POSTO', 'LAVAGEM', 'OFICINA', 'MECANICA', 'PINTURA',
 ];
+
+// Filtra apenas palavras com exatamente 5 letras
+export const WORDS = ALL_WORDS.filter(word => word.length === 5);
 
 export const getRandomWord = (): string => {
   return WORDS[Math.floor(Math.random() * WORDS.length)];
