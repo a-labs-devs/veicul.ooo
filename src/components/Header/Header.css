@@ -1,0 +1,85 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+}
+
+.header-left,
+.header-right {
+  flex: 1;
+  display: flex;
+}
+
+.header-right {
+  justify-content: flex-end;
+}
+
+.header-center {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
+.mode-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  background-color: transparent;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.mode-button:hover {
+  background-color: var(--color-empty);
+}
+
+.mode-button.active {
+  border-color: var(--color-correct);
+  font-weight: bold;
+}
+
+.icon-button {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.icon-button:hover {
+  background-color: var(--color-empty);
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .mode-button {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+
+  .icon-button {
+    font-size: 1.2rem;
+  }
+}

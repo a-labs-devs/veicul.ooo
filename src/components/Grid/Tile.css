@@ -1,0 +1,58 @@
+.tile {
+  width: 62px;
+  height: 62px;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.tile-empty {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.tile-correct {
+  background-color: var(--color-correct);
+  border-color: var(--color-correct);
+  color: white;
+  animation: flip 0.5s ease;
+}
+
+.tile-present {
+  background-color: var(--color-present);
+  border-color: var(--color-present);
+  color: white;
+  animation: flip 0.5s ease;
+}
+
+.tile-absent {
+  background-color: var(--color-absent);
+  border-color: var(--color-absent);
+  color: white;
+  animation: flip 0.5s ease;
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateX(0deg);
+  }
+  50% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .tile {
+    width: 52px;
+    height: 52px;
+    font-size: 1.5rem;
+  }
+}
