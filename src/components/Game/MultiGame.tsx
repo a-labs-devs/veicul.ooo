@@ -3,6 +3,7 @@ import './MultiGame.css';
 import Grid from '../Grid/Grid';
 import Keyboard from '../Keyboard/Keyboard';
 import ToastContainer from '../Toast/ToastContainer';
+import GameOverModal from '../GameOverModal/GameOverModal';
 import { GameState, Guess, GameStateExtended } from '../../types/game';
 import { getDailyWord, isValidWord, normalizeWord, WORDS } from '../../data/words';
 import { createGuess } from '../../utils/game';
@@ -16,44 +17,71 @@ interface MultiGameProps {
 
 const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
   const { toasts, removeToast, showSuccess, showError } = useToast();
+  const [showGameOverModal, setShowGameOverModal] = useState(false);
   
+  const wordLength = 5;
+
   const [games, setGames] = useState<GameState[]>(() => {
-    // Generate multiple target words
     const targets: string[] = [];
     const dailyWord = getDailyWord();
     targets.push(dailyWord);
     
-    // Get other random words different from the daily word
     const availableWords = WORDS.filter(w => normalizeWord(w) !== normalizeWord(dailyWord));
     for (let i = 1; i < gameCount; i++) {
       const randomIndex = (i * 17 + targets.length) % availableWords.length;
       targets.push(availableWords[randomIndex]);
     }
 
-    return targets.map(target => ({
-      target,
-      guesses: [],
-      currentGuess: '',
-      gameStatus: 'playing' as const,
-      maxGuesses,
-    }));
+    return targets.map(target => {
+      const saved = loadGameStateExtended(target);
+      
+      if (saved && saved.tries.length > 0) {
+        const guesses = saved.tries.map(tryWord => 
+          createGuess(tryWord.join(''), target)
+        );
+        
+        let status: 'playing' | 'won' | 'lost' = 'playing';
+        if (saved.won === true) status = 'won';
+        else if (saved.won === false && saved.gameOver) status = 'lost';
+        
+        return {
+          target,
+          guesses,
+          currentGuess: '',
+          gameStatus: status,
+          maxGuesses,
+        };
+      }
+      
+      return {
+        target,
+        guesses: [],
+        currentGuess: '',
+        gameStatus: 'playing' as const,
+        maxGuesses,
+      };
+    });
   });
-
-  const [currentGuess, setCurrentGuess] = useState('');
-  const [allGuesses, setAllGuesses] = useState<Guess[]>([]);
-  const wordLength = 5;
 
   const [extendedStates, setExtendedStates] = useState<GameStateExtended[]>(() => {
     return games.map(game => {
       const saved = loadGameStateExtended(game.target);
-      if (saved && !saved.gameOver) {
+      if (saved) {
         return saved;
       }
       return initializeGameStateExtended(game.target);
     });
   });
 
-  // Salva os estados estendidos sempre que mudarem
+  const [currentGuess, setCurrentGuess] = useState('');
+  const [allGuesses, setAllGuesses] = useState<Guess[]>(() => {
+    const firstGame = games[0];
+    if (firstGame && firstGame.guesses.length > 0) {
+      return firstGame.guesses;
+    }
+    return [];
+  });
+
   useEffect(() => {
     extendedStates.forEach(state => {
       saveGameStateExtended('multi', state);
@@ -72,9 +100,8 @@ const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
       }
 
       if (!isValidWord(currentGuess)) {
-        showError('Palavra não encontrada na lista!', 2000);
+        showError('Palavra inválida!', 2000);
         
-        // Adiciona às tentativas inválidas de todos os jogos
         setExtendedStates(prev => prev.map(state => ({
           ...state,
           invalids: [...state.invalids, currentGuess],
@@ -82,7 +109,16 @@ const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
         return;
       }
 
-      // Apply guess to all games
+      const normalizedGuess = normalizeWord(currentGuess);
+      const alreadyTried = allGuesses.some(g => 
+        normalizeWord(g.word) === normalizedGuess
+      );
+
+      if (alreadyTried) {
+        showError('Você já tentou essa palavra!', 2000);
+        return;
+      }
+
       const newGames = games.map((game, index) => {
         if (game.gameStatus !== 'playing') return game;
 
@@ -90,7 +126,6 @@ const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
         const newGuesses = [...game.guesses, guess];
         const isCorrect = normalizeWord(currentGuess) === normalizeWord(game.target);
         
-        // Atualiza estado estendido deste jogo específico
         const currentTry = currentGuess.split('');
         setExtendedStates(prev => {
           const newStates = [...prev];
@@ -126,23 +161,15 @@ const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
       setAllGuesses(newAllGuesses);
       setCurrentGuess('');
 
-      // Check if all games are now finished
       const nowAllFinished = newGames.every(g => g.gameStatus !== 'playing');
       if (nowAllFinished) {
         const allWon = newGames.every(g => g.gameStatus === 'won');
         updateStats(allWon, newAllGuesses.length);
         
-        setTimeout(() => {
-          if (allWon) {
-            showSuccess('Parabéns! Você acertou todas as palavras! 🎉', 4000);
-          } else {
-            const lostGames = newGames.filter(g => g.gameStatus === 'lost');
-            const words = lostGames.map(g => g.target.toUpperCase()).join(', ');
-            showSuccess(`Palavras: ${words}`, 5000);
-          }
-        }, 500);
+        if (!allWon) {
+          setTimeout(() => setShowGameOverModal(true), 800);
+        }
       }
-      // Se errou mas ainda tem tentativas, apenas avança silenciosamente
     } else if (key === '⌫' || key === 'BACKSPACE') {
       const newGuess = currentGuess.slice(0, -1);
       setCurrentGuess(newGuess);
@@ -180,6 +207,13 @@ const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
   return (
     <div className="multi-game">
       <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <GameOverModal
+        isOpen={showGameOverModal}
+        onClose={() => setShowGameOverModal(false)}
+        won={games.every(g => g.gameStatus === 'won')}
+        targetWords={games.map(g => g.target)}
+        guessCount={allGuesses.length}
+      />
       <div className={`games-container games-${gameCount}`}>
         {games.map((game, index) => (
           <div key={index} className={`game-board ${game.gameStatus === 'won' ? 'won' : ''}`}>
@@ -189,6 +223,7 @@ const MultiGame: React.FC<MultiGameProps> = ({ gameCount, maxGuesses = 7 }) => {
               currentGuess={game.gameStatus === 'playing' ? currentGuess : ''}
               maxGuesses={maxGuesses}
               wordLength={wordLength}
+              gameStatus={game.gameStatus}
             />
           </div>
         ))}

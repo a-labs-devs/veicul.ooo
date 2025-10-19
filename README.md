@@ -10,12 +10,6 @@ Jogo de palavras sobre carros inspirado no **Termo** (versão brasileira do Word
   - 🟨 **Amarelo**: Letra existe mas está em outra posição
   - ⬜ **Cinza**: Letra não existe na palavra
 
-## 🎯 Modos de Jogo
-
-- **Termo**: 1 palavra
-- **Dueto**: 2 palavras simultâneas
-- **Quarteto**: 4 palavras simultâneas
-
 ## 🚀 Tecnologias
 
 - React 19

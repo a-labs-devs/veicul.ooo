@@ -8,10 +8,13 @@ interface GridProps {
   currentGuess: string;
   maxGuesses: number;
   wordLength: number;
+  shake?: boolean;
+  gameStatus?: 'playing' | 'won' | 'lost';
 }
 
-const Grid: React.FC<GridProps> = ({ guesses, currentGuess, maxGuesses, wordLength }) => {
-  const emptyRows = maxGuesses - guesses.length - (currentGuess ? 1 : 0);
+const Grid: React.FC<GridProps> = ({ guesses, currentGuess, maxGuesses, wordLength, shake = false, gameStatus = 'playing' }) => {
+  const showCurrentRow = gameStatus === 'playing';
+  const emptyRows = maxGuesses - guesses.length - (showCurrentRow ? 1 : 0);
 
   const currentRowIndex = guesses.length;
   
@@ -27,17 +30,18 @@ const Grid: React.FC<GridProps> = ({ guesses, currentGuess, maxGuesses, wordLeng
           currentGuessLength={0}
         />
       ))}
-      {currentGuess && (
+      {showCurrentRow && (
         <Row 
           key={`current-${currentRowIndex}`}
-          guess={{ 
+          guess={currentGuess ? { 
             word: currentGuess, 
             letters: currentGuess.split('').map(char => ({ char, state: 'empty' })) 
-          }} 
+          } : null} 
           wordLength={wordLength}
           isCurrentRow={true}
           isFutureRow={false}
           currentGuessLength={currentGuess.length}
+          shake={shake}
         />
       )}
       {Array.from({ length: emptyRows }).map((_, i) => (

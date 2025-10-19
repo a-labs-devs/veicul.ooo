@@ -1,15 +1,12 @@
 import React from 'react';
 import './Header.css';
-import { GameMode } from '../../types/game';
 
 interface HeaderProps {
-  mode: GameMode;
-  onModeChange: (mode: GameMode) => void;
   onShowStats: () => void;
   onShowHelp: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ mode, onModeChange, onShowStats, onShowHelp }) => {
+const Header: React.FC<HeaderProps> = ({ onShowStats, onShowHelp }) => {
   return (
     <header className="header">
       <div className="header-left">
@@ -19,27 +16,7 @@ const Header: React.FC<HeaderProps> = ({ mode, onModeChange, onShowStats, onShow
       </div>
       
       <div className="header-center">
-        <h1 className="title">VEÍCUL.OOO</h1>
-        <div className="mode-selector">
-          <button
-            className={`mode-button ${mode === 'termo' ? 'active' : ''}`}
-            onClick={() => onModeChange('termo')}
-          >
-            Termo
-          </button>
-          <button
-            className={`mode-button ${mode === 'dueto' ? 'active' : ''}`}
-            onClick={() => onModeChange('dueto')}
-          >
-            Dueto
-          </button>
-          <button
-            className={`mode-button ${mode === 'quarteto' ? 'active' : ''}`}
-            onClick={() => onModeChange('quarteto')}
-          >
-            Quarteto
-          </button>
-        </div>
+        <h1 className="title">VEÍCULO</h1>
       </div>
       
       <div className="header-right">

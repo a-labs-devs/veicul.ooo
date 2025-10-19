@@ -65,8 +65,6 @@ export const isNewDay = (): boolean => {
   return lastPlayed !== today;
 };
 
-// Funções para o novo sistema completo de storage
-
 export const loadConfig = (): GameConfig => {
   const stored = localStorage.getItem(CONFIG_KEY);
   if (stored) {
@@ -95,7 +93,6 @@ export const loadFullGameData = (): FullGameData => {
     return JSON.parse(stored);
   }
   
-  // Retorna estrutura inicial
   return {
     config: loadConfig(),
     meta: {
@@ -115,7 +112,6 @@ export const saveFullGameData = (data: FullGameData): void => {
 export const saveGameStateExtended = (_mode: string, state: GameStateExtended): void => {
   const fullData = loadFullGameData();
   
-  // Atualiza ou adiciona o estado do jogo específico
   const existingIndex = fullData.state.findIndex(s => s.solution === state.solution);
   if (existingIndex >= 0) {
     fullData.state[existingIndex] = state;

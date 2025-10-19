@@ -1,7 +1,10 @@
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin: 20px auto;
+  gap: 6px;
+  margin: 0 auto;
   width: fit-content;
+  flex-shrink: 1;
+  justify-content: center;
+  align-items: center;
 }

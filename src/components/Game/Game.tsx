@@ -3,7 +3,7 @@ import './Game.css';
 import Grid from '../Grid/Grid';
 import Keyboard from '../Keyboard/Keyboard';
 import ToastContainer from '../Toast/ToastContainer';
-import HintButton from '../HintButton/HintButton';
+import GameOverModal from '../GameOverModal/GameOverModal';
 import { GameState, GameStateExtended } from '../../types/game';
 import { getDailyWord, isValidWord, normalizeWord } from '../../data/words';
 import { createGuess } from '../../utils/game';
@@ -21,49 +21,53 @@ const Game: React.FC<GameProps> = ({
   maxGuesses = 6,
   targetWord 
 }) => {
-  const { toasts, removeToast, showSuccess, showError, showInfo } = useToast();
+  const { toasts, removeToast, showError } = useToast();
+  const [shake, setShake] = useState(false);
+  const [showGameOverModal, setShowGameOverModal] = useState(false);
   
-  const [gameState, setGameState] = useState<GameState>(() => ({
-    target: targetWord || getDailyWord(),
-    guesses: [],
-    currentGuess: '',
-    gameStatus: 'playing',
-    maxGuesses,
-  }));
-
   const [extendedState, setExtendedState] = useState<GameStateExtended>(() => {
     const target = targetWord || getDailyWord();
     const saved = loadGameStateExtended(target);
-    if (saved && !saved.gameOver) {
+    if (saved) {
       return saved;
     }
     return initializeGameStateExtended(target);
   });
 
-  // Salva o estado estendido sempre que mudar
-  useEffect(() => {
-    saveGameStateExtended('termo', extendedState);
-  }, [extendedState]);
-
-  // Restaura o estado do jogo a partir do estado estendido
-  useEffect(() => {
-    if (extendedState.tries.length > 0) {
-      const guesses = extendedState.tries.map(tryWord => 
-        createGuess(tryWord.join(''), gameState.target)
+  const [gameState, setGameState] = useState<GameState>(() => {
+    const target = targetWord || getDailyWord();
+    const saved = loadGameStateExtended(target);
+    
+    if (saved && saved.tries.length > 0) {
+      const guesses = saved.tries.map(tryWord => 
+        createGuess(tryWord.join(''), target)
       );
       
       let status: 'playing' | 'won' | 'lost' = 'playing';
-      if (extendedState.won === true) status = 'won';
-      else if (extendedState.won === false && extendedState.gameOver) status = 'lost';
+      if (saved.won === true) status = 'won';
+      else if (saved.won === false && saved.gameOver) status = 'lost';
       
-      setGameState(prev => ({
-        ...prev,
+      return {
+        target,
         guesses,
-        currentGuess: extendedState.curTry.join(''),
+        currentGuess: saved.curTry.join(''),
         gameStatus: status,
-      }));
+        maxGuesses,
+      };
     }
-  }, []);
+    
+    return {
+      target,
+      guesses: [],
+      currentGuess: '',
+      gameStatus: 'playing',
+      maxGuesses,
+    };
+  });
+
+  useEffect(() => {
+    saveGameStateExtended('termo', extendedState);
+  }, [extendedState]);
 
   useEffect(() => {
     if (targetWord) {
@@ -77,41 +81,8 @@ const Game: React.FC<GameProps> = ({
     }
   }, [targetWord]);
 
-  const handleHint = useCallback(() => {
-    if (gameState.gameStatus !== 'playing') return;
-    if (extendedState.hintsUsed >= 2) {
-      showError('Você já usou todas as dicas!', 2000);
-      return;
-    }
-
-    const target = gameState.target.toUpperCase();
-    const availableIndices = [];
-    
-    for (let i = 0; i < target.length; i++) {
-      if (!extendedState.revealedLetters.includes(i)) {
-        availableIndices.push(i);
-      }
-    }
-
-    if (availableIndices.length === 0) {
-      showError('Todas as letras já foram reveladas!', 2000);
-      return;
-    }
-
-    const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-    const letter = target[randomIndex];
-    
-    setExtendedState(prev => ({
-      ...prev,
-      hintsUsed: prev.hintsUsed + 1,
-      revealedLetters: [...prev.revealedLetters, randomIndex],
-    }));
-
-    showInfo(`💡 Posição ${randomIndex + 1}: ${letter}`, 4000);
-  }, [gameState, extendedState, showError, showInfo]);
-
   const handleKeyPress = useCallback((key: string) => {
-    if (gameState.gameStatus !== 'playing') return;
+    if (gameState.gameStatus !== 'playing' || extendedState.gameOver) return;
 
     if (key === 'ENTER') {
       if (gameState.currentGuess.length !== wordLength) {
@@ -120,9 +91,11 @@ const Game: React.FC<GameProps> = ({
       }
 
       if (!isValidWord(gameState.currentGuess)) {
-        showError('Palavra não encontrada na lista!', 2000);
+        showError('Palavra inválida!', 2000);
         
-        // Adiciona às tentativas inválidas
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+        
         setExtendedState(prev => ({
           ...prev,
           invalids: [...prev.invalids, gameState.currentGuess],
@@ -130,20 +103,22 @@ const Game: React.FC<GameProps> = ({
         return;
       }
 
+      const normalizedGuess = normalizeWord(gameState.currentGuess);
+      const alreadyTried = gameState.guesses.some(g => 
+        normalizeWord(g.word) === normalizedGuess
+      );
+
+      if (alreadyTried) {
+        showError('Você já tentou essa palavra!', 2000);
+        
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+        return;
+      }
+
       const guess = createGuess(gameState.currentGuess, gameState.target);
       const newGuesses = [...gameState.guesses, guess];
       const isCorrect = normalizeWord(gameState.currentGuess) === normalizeWord(gameState.target);
-      
-      // Atualiza estado estendido
-      const currentTry = gameState.currentGuess.split('');
-      setExtendedState(prev => ({
-        ...prev,
-        tries: [...prev.tries, currentTry],
-        curRow: prev.curRow + 1,
-        curTry: [],
-        gameOver: isCorrect || newGuesses.length >= maxGuesses,
-        won: isCorrect ? true : (newGuesses.length >= maxGuesses ? false : null),
-      }));
       
       let newStatus: 'playing' | 'won' | 'lost' = gameState.gameStatus;
       if (isCorrect) {
@@ -154,6 +129,18 @@ const Game: React.FC<GameProps> = ({
         updateStats(false, newGuesses.length);
       }
 
+      const currentTry = gameState.currentGuess.split('');
+      const isGameOver = isCorrect || newGuesses.length >= maxGuesses;
+      
+      setExtendedState(prev => ({
+        ...prev,
+        tries: [...prev.tries, currentTry],
+        curRow: prev.curRow + 1,
+        curTry: [],
+        gameOver: isGameOver,
+        won: isCorrect ? true : (newGuesses.length >= maxGuesses ? false : null),
+      }));
+
       setGameState({
         ...gameState,
         guesses: newGuesses,
@@ -161,13 +148,9 @@ const Game: React.FC<GameProps> = ({
         gameStatus: newStatus,
       });
 
-      // Toast apenas para vitória ou derrota final
-      if (newStatus === 'won') {
-        setTimeout(() => showSuccess('Parabéns! Você acertou! 🎉', 4000), 500);
-      } else if (newStatus === 'lost') {
-        setTimeout(() => showSuccess(`A palavra era: ${gameState.target.toUpperCase()}`, 4000), 500);
+      if (newStatus === 'lost') {
+        setTimeout(() => setShowGameOverModal(true), 800);
       }
-      // Se errou mas ainda tem tentativas, apenas avança silenciosamente
     } else if (key === '⌫' || key === 'BACKSPACE') {
       const newGuess = gameState.currentGuess.slice(0, -1);
       setGameState({
@@ -189,7 +172,7 @@ const Game: React.FC<GameProps> = ({
         curTry: newGuess.split(''),
       }));
     }
-  }, [gameState, extendedState, wordLength, maxGuesses, showSuccess, showError]);
+  }, [gameState, extendedState, wordLength, maxGuesses, showError]);
 
   useEffect(() => {
     const handlePhysicalKeyPress = (e: KeyboardEvent) => {
@@ -211,18 +194,26 @@ const Game: React.FC<GameProps> = ({
   return (
     <div className="game">
       <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <GameOverModal
+        isOpen={showGameOverModal}
+        onClose={() => setShowGameOverModal(false)}
+        won={gameState.gameStatus === 'won'}
+        targetWord={gameState.target}
+      />
       <Grid
         guesses={gameState.guesses}
         currentGuess={gameState.currentGuess}
         maxGuesses={maxGuesses}
         wordLength={wordLength}
+        shake={shake}
+        gameStatus={gameState.gameStatus}
       />
-      <HintButton 
+      {/* <HintButton 
         onHint={handleHint}
         hintsUsed={extendedState.hintsUsed}
         maxHints={2}
         disabled={gameState.gameStatus !== 'playing'}
-      />
+      /> */}
       <Keyboard onKeyPress={handleKeyPress} guesses={gameState.guesses} />
     </div>
   );

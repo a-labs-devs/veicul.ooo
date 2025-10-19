@@ -23,7 +23,7 @@ const Tile: React.FC<TileProps> = ({
   const classes = [
     'tile',
     `tile-${state}`,
-    isCurrentRow && !isSubmitted ? 'tile-current-row' : '',
+    isCurrentRow ? 'tile-current-row' : '',
     isCurrentRow && hasLetter && !isSubmitted ? 'tile-has-letter' : '',
     isActive ? 'tile-active' : '',
     isFirstActive ? 'tile-active-first' : '',

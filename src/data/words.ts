@@ -1,14 +1,8 @@
-// Lista de palavras relacionadas a carros (SOMENTE 5 letras)
 const ALL_WORDS = [
-  // Modelos de carros
   'FUSCA', 'CIVIC', 'CORSA', 'PALIO', 'GOLFE', 'CELTA', 'KOMBI',
   'ONIX', 'TUCSON', 'KICKS', 'ARGO', 'MOBI', 'SPIN', 'COBALT',
   'VERSA', 'MARCH', 'LOGAN', 'DUSTER', 'TORO', 'STRADA',
-  
-  // Marcas (5 letras)
   'VOLVO', 'HONDA', 'LEXUS', 'TESLA', 'SMART', 'DODGE',
-  
-  // Partes e termos relacionados
   'FREIO', 'PNEUS', 'MOTOR', 'BANCO', 'VIDRO', 'PORTA',
   'FAROL', 'CAPOT', 'TANQUE', 'VOLANTE', 'PEDAL', 'BUZINA',
   'LIXA', 'CHAVE', 'OLEO', 'FILTRO', 'DISCO', 'CINTO',
@@ -21,9 +15,21 @@ const ALL_WORDS = [
   'HATCH', 'COUPE', 'WAGON', 'JEEP', 'PICAPE', 'UTILITARIO',
   'PISTA', 'CURVA', 'RETA', 'ESTRADA', 'ASFALTO', 'GARAGEM',
   'VAGA', 'POSTO', 'LAVAGEM', 'OFICINA', 'MECANICA', 'PINTURA',
+  'AUDI', 'FIAT', 'FORD', 'ASTRA', 'VECTRA', 'CRUZE',
+  'OMEGA', 'MONZA', 'OPALA', 'KADETT', 'DELTA', 'SIENA',
+  'PUNTO', 'LINEA', 'MAREA', 'TEMPRA', 'TIPO', 'DOBLO',
+  'DUCATO', 'IDEA', 'STILO', 'BRAVO', 'FOCUS', 'FIESTA',
+  'ESCORT', 'VERONA', 'PAMPA', 'CORCEL', 'FUSION', 'EDGE',
+  'PRADO', 'HILUX', 'ETIOS', 'YARIS', 'SUPRA', 'CAMRY',
+  'PRIUS', 'ACCORD', 'CITY', 'NISSAN', 'SENTRA', 'LEAF',
+  'TIIDA', 'LIVINA', 'AMAROK', 'TIGUAN', 'VOYAGE', 'JETTA',
+  'PASSAT', 'POLO', 'CAPTUR', 'CLIO', 'MEGANE', 'FLUENCE',
+  'SCENIC', 'SANDERO', 'POLIA', 'PORCA', 'BUCHA', 'CALCO',
+  'DRENO', 'GUIAS', 'HASTES', 'EIXOS', 'COIFA', 'BICOS',
+  'LONAS', 'LAMAS', 'CHAPA', 'MASSA', 'SOLDA', 'MACACO',
+  'CAPO', 'LENTE', 'CABO', 'TAMPA', 'RODA',
 ];
 
-// Filtra apenas palavras com exatamente 5 letras
 export const WORDS = ALL_WORDS.filter(word => word.length === 5);
 
 export const getRandomWord = (): string => {

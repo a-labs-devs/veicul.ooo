@@ -81,6 +81,21 @@
   }
 }
 
+@keyframes toastSlideUp {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+}
+
+.toast.toast-closing {
+  animation: toastSlideUp 0.3s ease-in forwards;
+}
+
 @media (max-width: 768px) {
   .toast {
     min-width: 280px;

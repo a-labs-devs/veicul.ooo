@@ -1,0 +1,36 @@
+.gameover-content {
+  padding: 2vh 0;
+  text-align: center;
+}
+
+.gameover-message {
+  font-size: 2.2vh;
+  font-weight: 600;
+  margin-bottom: 2vh;
+  margin-top: 0;
+}
+
+.gameover-tries {
+  font-size: 1.8vh;
+  color: #538d4e;
+  font-weight: 600;
+  margin-top: 1vh;
+}
+
+.gameover-word-label {
+  font-size: 1.6vh;
+  color: #787c7e;
+  margin-bottom: 1vh;
+}
+
+.gameover-word {
+  font-size: 3.5vh;
+  font-weight: 700;
+  color: #d32f2f;
+  letter-spacing: 0.3vh;
+  margin-top: 0.5vh;
+  padding: 1.5vh;
+  background: rgba(211, 47, 47, 0.1);
+  border-radius: 1vh;
+  display: inline-block;
+}

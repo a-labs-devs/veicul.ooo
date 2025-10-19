@@ -10,8 +10,9 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 20px;
+  padding: 2vh 2vw;
   animation: fadeIn 0.2s ease;
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {
@@ -23,18 +24,48 @@
   }
 }
 
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.modal-overlay.modal-closing {
+  animation: fadeOut 0.2s ease forwards;
+}
+
+.modal-overlay.modal-closing .modal-content {
+  animation: slideDown 0.2s ease forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
 .modal-content {
+  position: relative;
   background-color: var(--color-bg);
   border-radius: 12px;
   max-width: 500px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 85vh;
   overflow-y: auto;
   box-shadow: 
     0 8px 16px rgba(0, 0, 0, 0.12),
     0 16px 32px rgba(0, 0, 0, 0.08),
     0 24px 48px rgba(0, 0, 0, 0.05);
   animation: slideUp 0.3s ease;
+  margin: auto;
 }
 
 @keyframes slideUp {
@@ -91,6 +122,66 @@
   transform: translateY(0);
 }
 
+.modal-close-no-header {
+  position: absolute;
+  top: 1.5vh;
+  right: 1.5vh;
+  z-index: 10;
+  width: 2.5vh;
+  height: 2.5vh;
+  font-size: 1.8vh;
+  border-radius: 50%;
+  color: #787c7e;
+  opacity: 0.6;
+}
+
+.modal-close-no-header:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
 .modal-body {
   padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 1vh 1vw;
+  }
+  
+  .modal-header {
+    padding: 12px;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .modal-close {
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+  }
+  
+  .modal-body {
+    padding: 12px;
+  }
+}
+
+@media (max-height: 700px) {
+  .modal-content {
+    max-height: 90vh;
+  }
+  
+  .modal-header {
+    padding: 10px 15px;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .modal-body {
+    padding: 15px;
+  }
 }

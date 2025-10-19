@@ -9,6 +9,7 @@ interface RowProps {
   isCurrentRow?: boolean;
   isFutureRow?: boolean;
   currentGuessLength?: number;
+  shake?: boolean;
 }
 
 const Row: React.FC<RowProps> = ({ 
@@ -16,7 +17,8 @@ const Row: React.FC<RowProps> = ({
   wordLength, 
   isCurrentRow = false, 
   isFutureRow = false,
-  currentGuessLength = 0
+  currentGuessLength = 0,
+  shake = false
 }) => {
   const tiles = [];
 
@@ -40,23 +42,27 @@ const Row: React.FC<RowProps> = ({
       );
     }
     
-    const rowClass = isCompleted ? 'row row-completed' : (isCurrentRow ? 'row row-current' : 'row');
+    const rowClass = `row ${isCompleted ? 'row-completed' : (isCurrentRow ? 'row-current' : '')} ${shake ? 'shake' : ''}`.trim();
     return <div className={rowClass}>{tiles}</div>;
   } else {
     for (let i = 0; i < wordLength; i++) {
+      const isActive = isCurrentRow && i === currentGuessLength;
+      const isFirstActive = isActive && i === 0;
+      
       tiles.push(
         <Tile 
           key={i} 
           letter="" 
           state="empty" 
-          isCurrentRow={false}
-          isActive={false}
+          isCurrentRow={isCurrentRow}
+          isActive={isActive}
+          isFirstActive={isFirstActive}
         />
       );
     }
   }
 
-  const rowClass = isFutureRow ? 'row row-future' : 'row';
+  const rowClass = isFutureRow ? 'row row-future' : (isCurrentRow ? 'row row-current' : 'row');
   return <div className={rowClass}>{tiles}</div>;
 };
 

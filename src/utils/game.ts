@@ -8,12 +8,10 @@ export const checkGuess = (guess: string, target: string): Letter[] => {
   const targetLetters = normalizedTarget.split('');
   const targetLetterCount: { [key: string]: number } = {};
 
-  // Count occurrences of each letter in target
   targetLetters.forEach(letter => {
     targetLetterCount[letter] = (targetLetterCount[letter] || 0) + 1;
   });
 
-  // First pass: mark correct letters
   const guessLetters = normalizedGuess.split('');
   const states: LetterState[] = new Array(guessLetters.length).fill('absent');
 
@@ -24,7 +22,6 @@ export const checkGuess = (guess: string, target: string): Letter[] => {
     }
   });
 
-  // Second pass: mark present letters
   guessLetters.forEach((letter, i) => {
     if (states[i] === 'absent' && targetLetterCount[letter] > 0) {
       states[i] = 'present';
@@ -32,7 +29,6 @@ export const checkGuess = (guess: string, target: string): Letter[] => {
     }
   });
 
-  // Create letter objects with original characters
   guess.split('').forEach((char, i) => {
     letters.push({
       char: char.toUpperCase(),

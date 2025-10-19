@@ -56,18 +56,9 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           <ul>
             <li>As palavras são relacionadas a carros: marcas, modelos, peças e termos automotivos.</li>
             <li>Todas as palavras têm 5 letras.</li>
-            <li>Os acentos são preenchidos automaticamente e não são considerados nas dicas.</li>
+            <li>Os acentos são preenchidos automaticamente.</li>
             <li>As palavras podem possuir letras repetidas.</li>
             <li>Uma palavra nova aparece a cada dia!</li>
-          </ul>
-        </div>
-
-        <div className="modes">
-          <h3>Modos de Jogo:</h3>
-          <ul>
-            <li><strong>Termo:</strong> Descubra 1 palavra</li>
-            <li><strong>Dueto:</strong> Descubra 2 palavras ao mesmo tempo</li>
-            <li><strong>Quarteto:</strong> Descubra 4 palavras ao mesmo tempo</li>
           </ul>
         </div>
       </div>

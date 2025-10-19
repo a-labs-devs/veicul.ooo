@@ -15,7 +15,7 @@ export interface GameStats {
   won: number;
   currentStreak: number;
   maxStreak: number;
-  guessDistribution: number[]; // [1-guess wins, 2-guess wins, ..., 6-guess wins]
+  guessDistribution: number[];
 }
 
 export interface GameConfig {
@@ -40,7 +40,7 @@ export interface GameStateExtended {
   gameOver: boolean;
   won: boolean | null;
   hintsUsed: number;
-  revealedLetters: number[]; // índices das letras reveladas
+  revealedLetters: number[];
 }
 
 export interface GameState {
@@ -57,5 +57,3 @@ export interface FullGameData {
   stats: GameStats;
   state: GameStateExtended[];
 }
-
-export type GameMode = 'termo' | 'dueto' | 'quarteto';
