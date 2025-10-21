@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ],
+  "env": {
+    "VITE_OPENROUTER_API_KEY": "@openrouter-api-key",
+    "VITE_GROQ_API_KEY": "@groq-api-key"
+  }
+}

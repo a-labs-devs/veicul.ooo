@@ -5,7 +5,7 @@ import Keyboard from '../Keyboard/Keyboard';
 import ToastContainer from '../Toast/ToastContainer';
 import GameOverModal from '../GameOverModal/GameOverModal';
 import { GameState, GameStateExtended } from '../../types/game';
-import { getDailyWord, isValidWord, normalizeWord } from '../../data/words';
+import { isValidWord, normalizeWord } from '../../data/words';
 import { createGuess } from '../../utils/game';
 import { updateStats, loadGameStateExtended, saveGameStateExtended, initializeGameStateExtended } from '../../utils/storage';
 import { useToast } from '../../hooks/useToast';
@@ -17,16 +17,16 @@ interface GameProps {
 }
 
 const Game: React.FC<GameProps> = ({ 
-  wordLength = 5, 
   maxGuesses = 6,
   targetWord 
 }) => {
   const { toasts, removeToast, showError } = useToast();
   const [shake, setShake] = useState(false);
   const [showGameOverModal, setShowGameOverModal] = useState(false);
+  const target = targetWord || '';
+  const actualWordLength = target.length;
   
   const [extendedState, setExtendedState] = useState<GameStateExtended>(() => {
-    const target = targetWord || getDailyWord();
     const saved = loadGameStateExtended(target);
     
     if (saved && saved.solution === target) {
@@ -36,7 +36,6 @@ const Game: React.FC<GameProps> = ({
   });
 
   const [gameState, setGameState] = useState<GameState>(() => {
-    const target = targetWord || getDailyWord();
     const saved = loadGameStateExtended(target);
     if (saved && saved.solution === target && saved.tries.length > 0) {
       const guesses = saved.tries.map(tryWord => 
@@ -81,16 +80,17 @@ const Game: React.FC<GameProps> = ({
     }
   }, [targetWord]);
 
-  const handleKeyPress = useCallback((key: string) => {
+  const handleKeyPress = useCallback(async (key: string) => {
     if (gameState.gameStatus !== 'playing' || extendedState.gameOver) return;
 
     if (key === 'ENTER') {
-      if (gameState.currentGuess.length !== wordLength) {
-        showError(`A palavra deve ter ${wordLength} letras!`, 2000);
+      if (gameState.currentGuess.length !== actualWordLength) {
+        showError(`A palavra deve ter ${actualWordLength} letras!`, 2000);
         return;
       }
 
-      if (!isValidWord(gameState.currentGuess)) {
+      const valid = await isValidWord(gameState.currentGuess, actualWordLength);
+      if (!valid) {
         showError('Palavra inválida!', 2000);
         
         setShake(true);
@@ -161,7 +161,7 @@ const Game: React.FC<GameProps> = ({
         ...prev,
         curTry: newGuess.split(''),
       }));
-    } else if (gameState.currentGuess.length < wordLength) {
+    } else if (gameState.currentGuess.length < actualWordLength) {
       const newGuess = gameState.currentGuess + key;
       setGameState({
         ...gameState,
@@ -172,7 +172,7 @@ const Game: React.FC<GameProps> = ({
         curTry: newGuess.split(''),
       }));
     }
-  }, [gameState, extendedState, wordLength, maxGuesses, showError]);
+  }, [gameState, extendedState, actualWordLength, maxGuesses, showError]);
 
   useEffect(() => {
     const handlePhysicalKeyPress = (e: KeyboardEvent) => {
@@ -204,7 +204,7 @@ const Game: React.FC<GameProps> = ({
         guesses={gameState.guesses}
         currentGuess={gameState.currentGuess}
         maxGuesses={maxGuesses}
-        wordLength={wordLength}
+        wordLength={actualWordLength}
         shake={shake}
         gameStatus={gameState.gameStatus}
       />

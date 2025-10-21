@@ -1,48 +1,5 @@
-const ALL_WORDS = [
-  'FUSCA', 'CIVIC', 'CORSA', 'PALIO', 'GOLFE', 'CELTA', 'KOMBI',
-  'ONIX', 'TUCSON', 'KICKS', 'ARGO', 'MOBI', 'SPIN', 'COBALT',
-  'VERSA', 'MARCH', 'LOGAN', 'DUSTER', 'TORO', 'STRADA',
-  'VOLVO', 'HONDA', 'LEXUS', 'TESLA', 'SMART', 'DODGE',
-  'FREIO', 'PNEUS', 'MOTOR', 'BANCO', 'VIDRO', 'PORTA',
-  'FAROL', 'CAPOT', 'TANQUE', 'VOLANTE', 'PEDAL', 'BUZINA',
-  'LIXA', 'CHAVE', 'OLEO', 'FILTRO', 'DISCO', 'CINTO',
-  'BANCOS', 'PORTAS', 'RODAS', 'RAIOS', 'TRAVA', 'TURBO',
-  'TUCHO', 'VELAS', 'BOMBA', 'SONDA', 'VALVULA', 'PISTAO',
-  'BIELA', 'JUNTA', 'MOLA', 'EIXO', 'CAMBIO', 'EMBREAGEM',
-  'MARCHA', 'ALAVANCA', 'PAINEL', 'RADIO', 'ANTENA', 'FACHO',
-  'SETA', 'PISCA', 'LANTERNA', 'GRADE', 'PARALAMA', 'PARA',
-  'CHOQUE', 'PLACA', 'CHASSI', 'CARRO', 'AUTO', 'SEDAN',
-  'HATCH', 'COUPE', 'WAGON', 'JEEP', 'PICAPE', 'UTILITARIO',
-  'PISTA', 'CURVA', 'RETA', 'ESTRADA', 'ASFALTO', 'GARAGEM',
-  'VAGA', 'POSTO', 'LAVAGEM', 'OFICINA', 'MECANICA', 'PINTURA',
-  'AUDI', 'FIAT', 'FORD', 'ASTRA', 'VECTRA', 'CRUZE',
-  'OMEGA', 'MONZA', 'OPALA', 'KADETT', 'DELTA', 'SIENA',
-  'PUNTO', 'LINEA', 'MAREA', 'TEMPRA', 'TIPO', 'DOBLO',
-  'DUCATO', 'IDEA', 'STILO', 'BRAVO', 'FOCUS', 'FIESTA',
-  'ESCORT', 'VERONA', 'PAMPA', 'CORCEL', 'FUSION', 'EDGE',
-  'PRADO', 'HILUX', 'ETIOS', 'YARIS', 'SUPRA', 'CAMRY',
-  'PRIUS', 'ACCORD', 'CITY', 'NISSAN', 'SENTRA', 'LEAF',
-  'TIIDA', 'LIVINA', 'AMAROK', 'TIGUAN', 'VOYAGE', 'JETTA',
-  'PASSAT', 'POLO', 'CAPTUR', 'CLIO', 'MEGANE', 'FLUENCE',
-  'SCENIC', 'SANDERO', 'POLIA', 'PORCA', 'BUCHA', 'CALCO',
-  'DRENO', 'GUIAS', 'HASTES', 'EIXOS', 'COIFA', 'BICOS',
-  'LONAS', 'LAMAS', 'CHAPA', 'MASSA', 'SOLDA', 'MACACO',
-  'CAPO', 'LENTE', 'CABO', 'TAMPA', 'RODA',
-];
-
-export const WORDS = ALL_WORDS.filter(word => word.length === 5);
-
-export const getRandomWord = (): string => {
-  return WORDS[Math.floor(Math.random() * WORDS.length)];
-};
-
-export const getDailyWord = (): string => {
-  const today = new Date();
-  const start = new Date('2025-01-01');
-  const diff = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  const index = diff % WORDS.length;
-  return WORDS[index];
-};
+﻿import { generateVehicleWord } from '../services/openrouter';
+import { isValidWord as validateWord } from '../services/validator';
 
 export const normalizeLetter = (letter: string): string => {
   return letter
@@ -55,7 +12,49 @@ export const normalizeWord = (word: string): string => {
   return word.split('').map(normalizeLetter).join('');
 };
 
-export const isValidWord = (word: string): boolean => {
-  const normalized = normalizeWord(word);
-  return WORDS.some(w => normalizeWord(w) === normalized);
+export const isValidWord = async (word: string, wordLength?: number): Promise<boolean> => {
+  return validateWord(word, wordLength);
+};
+
+export const getRandomWord = async (minLength: number = 3, maxLength: number = 10): Promise<string> => {
+  return await generateVehicleWord(minLength, maxLength);
+};
+
+const DAILY_WORD_KEY = 'veiculooo_daily_word';
+
+interface DailyWordCache {
+  word: string;
+  date: string;
+}
+
+export const getDailyWord = async (): Promise<string> => {
+  const today = new Date().toISOString().split('T')[0];
+  
+  try {
+    const cached = localStorage.getItem(DAILY_WORD_KEY);
+    if (cached) {
+      const data: DailyWordCache = JSON.parse(cached);
+      if (data.date === today) {
+        return data.word;
+      }
+    }
+  } catch (error) {
+  }
+  
+  // Busca palavra do servidor (API) - SEMPRE via IA
+  const response = await fetch('/api/daily-word');
+  
+  if (!response.ok) {
+    throw new Error('Falha ao buscar palavra do dia da API');
+  }
+  
+  const data = await response.json();
+  
+  const cache: DailyWordCache = {
+    word: data.word,
+    date: data.date,
+  };
+  
+  localStorage.setItem(DAILY_WORD_KEY, JSON.stringify(cache));
+  return data.word;
 };

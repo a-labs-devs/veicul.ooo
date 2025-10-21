@@ -16,12 +16,28 @@ Jogo de palavras sobre carros inspirado no **Termo** (versão brasileira do Word
 - TypeScript
 - Vite
 - CSS Modules
+- Vercel Functions (Serverless API)
+- OpenRouter API (38 modelos de IA gratuitos)
+- Groq API (10 modelos de IA)
+
+## 🤖 Inteligência Artificial
+
+A palavra do dia é gerada por **IA** usando 48 modelos diferentes:
+- **38 modelos do OpenRouter** (primeira tentativa)
+- **10 modelos do Groq** (fallback)
+- Geração no servidor para garantir que todos os jogadores tenham a mesma palavra
+- Renovação automática diariamente às 00:00
+- Sistema de histórico para evitar repetição de palavras
 
 ## 🛠️ Desenvolvimento
 
 ```bash
 # Instalar dependências
 pnpm install
+
+# Configurar variáveis de ambiente
+cp .env.example .env
+# Edite o .env com suas chaves de API
 
 # Rodar em desenvolvimento
 pnpm dev
@@ -33,10 +49,28 @@ pnpm build
 pnpm preview
 ```
 
+### 🔑 Variáveis de Ambiente
+
+Crie um arquivo `.env` baseado no `.env.example`:
+
+```bash
+VITE_OPENROUTER_API_KEY=sua-chave-aqui
+VITE_GROQ_API_KEY=sua-chave-aqui
+```
+
+- OpenRouter: https://openrouter.ai/keys
+- Groq: https://console.groq.com/keys
+
+## 🚀 Deploy
+
+Veja [DEPLOY.md](./DEPLOY.md) para instruções completas de deploy no Vercel.
+
 ## 📝 Palavras
 
-O jogo inclui palavras relacionadas a:
-- Modelos de carros brasileiros
+A palavra do dia é gerada por IA e validada contra um dicionário de ~320.000 palavras em português.
+
+Palavras relacionadas a:
+- Modelos de carros
 - Marcas automotivas
 - Peças e componentes
 - Termos automotivos

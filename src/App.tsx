@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import './App.css';
 import Header from './components/Header/Header';
-import Game from './components/Game/Game';
+import GameLoader from './components/Game/GameLoader';
 import AdBanner from './components/AdBanner/AdBanner';
 import HelpModal from './components/HelpModal/HelpModal';
 import StatsModal from './components/StatsModal/StatsModal';
 import { loadStats } from './utils/storage';
+
+if (import.meta.env.DEV) {
+  import('./utils/debug');
+}
 
 const App: React.FC = () => {
   const [showHelp, setShowHelp] = useState(false);
@@ -19,7 +23,7 @@ const App: React.FC = () => {
       />
       
       <main className="main-content">
-        <Game />
+        <GameLoader />
       </main>
 
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
