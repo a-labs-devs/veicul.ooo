@@ -6,7 +6,7 @@
     }
   ],
   "env": {
-    "VITE_OPENROUTER_API_KEY": "@openrouter-api-key",
-    "VITE_GROQ_API_KEY": "@groq-api-key"
+    "VITE_OPENROUTER_API_KEY": "@openrouter_api_key",
+    "VITE_GROQ_API_KEY": "@groq_api_key"
   }
 }
