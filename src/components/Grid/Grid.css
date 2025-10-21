@@ -1,10 +1,30 @@
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: clamp(4px, 0.8vh, 8px);
   margin: 0 auto;
   width: fit-content;
   flex-shrink: 1;
   justify-content: center;
   align-items: center;
+  max-width: 100%;
+  padding: 0 4px;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    gap: clamp(3px, 0.6vh, 6px);
+  }
+}
+
+@media (max-height: 700px) {
+  .grid {
+    gap: clamp(3px, 0.5vh, 5px);
+  }
+}
+
+@media (max-height: 600px) {
+  .grid {
+    gap: 3px;
+  }
 }

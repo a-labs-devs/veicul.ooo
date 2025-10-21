@@ -40,21 +40,32 @@ export const getDailyWord = async (): Promise<string> => {
     }
   } catch (error) {
   }
-  
-  // Busca palavra do servidor (API) - SEMPRE via IA
-  const response = await fetch('/api/daily-word');
-  
-  if (!response.ok) {
-    throw new Error('Falha ao buscar palavra do dia da API');
+
+  if (import.meta.env.PROD) {
+    const response = await fetch('/api/daily-word');
+    
+    if (!response.ok) {
+      throw new Error('Falha ao buscar palavra do dia da API');
+    }
+    
+    const data = await response.json();
+    
+    const cache: DailyWordCache = {
+      word: data.word,
+      date: data.date,
+    };
+    
+    localStorage.setItem(DAILY_WORD_KEY, JSON.stringify(cache));
+    return data.word;
+  } else {
+    const word = await getRandomWord(5, 7);
+    
+    const cache: DailyWordCache = {
+      word,
+      date: today,
+    };
+    
+    localStorage.setItem(DAILY_WORD_KEY, JSON.stringify(cache));
+    return word;
   }
-  
-  const data = await response.json();
-  
-  const cache: DailyWordCache = {
-    word: data.word,
-    date: data.date,
-  };
-  
-  localStorage.setItem(DAILY_WORD_KEY, JSON.stringify(cache));
-  return data.word;
 };

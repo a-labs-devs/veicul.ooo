@@ -1,11 +1,11 @@
 .tile {
-  width: min(12vh, 70px);
-  height: min(12vh, 70px);
+  width: clamp(45px, 10vh, 70px);
+  height: clamp(45px, 10vh, 70px);
   border: 2px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: min(4.5vh, 2.2rem);
+  font-size: clamp(1.2rem, 4vh, 2.2rem);
   font-weight: 700;
   text-transform: uppercase;
   transition: all 0.3s ease;
@@ -208,17 +208,53 @@
 
 @media (max-width: 768px) {
   .tile {
-    width: min(10vh, 58px);
-    height: min(10vh, 58px);
-    font-size: min(3.5vh, 1.7rem);
+    width: clamp(38px, 8.5vh, 58px);
+    height: clamp(38px, 8.5vh, 58px);
+    font-size: clamp(1rem, 3.5vh, 1.7rem);
+    border-width: 1.5px;
+  }
+
+  .tile.tile-current-row.tile-empty,
+  .tile.tile-current-row {
+    border-width: 2px;
+  }
+
+  .tile.tile-active {
+    border-width: 2.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tile {
+    width: clamp(32px, 7.5vh, 50px);
+    height: clamp(32px, 7.5vh, 50px);
+    font-size: clamp(0.9rem, 3vh, 1.5rem);
   }
 }
 
 @media (max-height: 700px) {
   .tile {
-    width: min(9vh, 55px);
-    height: min(9vh, 55px);
-    font-size: min(3.2vh, 1.5rem);
+    width: clamp(38px, 8vh, 55px);
+    height: clamp(38px, 8vh, 55px);
+    font-size: clamp(1rem, 3.2vh, 1.5rem);
     border-width: 1.5px;
+  }
+}
+
+@media (max-height: 600px) {
+  .tile {
+    width: clamp(32px, 7vh, 48px);
+    height: clamp(32px, 7vh, 48px);
+    font-size: clamp(0.85rem, 2.8vh, 1.3rem);
+    border-width: 1px;
+  }
+
+  .tile.tile-current-row.tile-empty,
+  .tile.tile-current-row {
+    border-width: 1.5px;
+  }
+
+  .tile.tile-active {
+    border-width: 2px;
   }
 }

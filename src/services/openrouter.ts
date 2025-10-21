@@ -120,37 +120,33 @@ const callOpenRouter = async (
     throw new Error('API Key do OpenRouter não configurada');
   }
 
-  try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': window.location.origin,
-        'X-Title': 'Veiculooo',
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature: 0.7,
-        max_tokens: 100,
-      }),
-    });
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': window.location.origin,
+      'X-Title': 'Veiculooo',
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.7,
+      max_tokens: 100,
+    }),
+  });
 
-    if (!response.ok) {
-      return callOpenRouter(messages, modelIndex + 1);
-    }
-
-    const data = await response.json();
-    
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      return callOpenRouter(messages, modelIndex + 1);
-    }
-
-    return data.choices[0].message.content.trim();
-  } catch (error) {
-    return callOpenRouter(messages, modelIndex + 1);
+  if (!response.ok) {
+    throw new Error('Model request failed');
   }
+
+  const data = await response.json();
+  
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    throw new Error('Invalid response format');
+  }
+
+  return data.choices[0].message.content.trim();
 };
 
 const callGroq = async (
@@ -158,7 +154,7 @@ const callGroq = async (
   modelIndex: number = 0
 ): Promise<string> => {
   if (modelIndex >= GROQ_MODELS.length) {
-    throw new Error('Todos os modelos falharam. Tente novamente mais tarde.');
+    throw new Error('All models failed');
   }
 
   const model = GROQ_MODELS[modelIndex];
@@ -168,49 +164,52 @@ const callGroq = async (
     throw new Error('API Key do Groq não configurada');
   }
 
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature: 0.7,
-        max_tokens: 100,
-      }),
-    });
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.7,
+      max_tokens: 100,
+    }),
+  });
 
-    if (!response.ok) {
-      return callGroq(messages, modelIndex + 1);
-    }
-
-    const data = await response.json();
-    
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      return callGroq(messages, modelIndex + 1);
-    }
-
-    return data.choices[0].message.content.trim();
-  } catch (error) {
-    return callGroq(messages, modelIndex + 1);
+  if (!response.ok) {
+    throw new Error('Model request failed');
   }
+
+  const data = await response.json();
+  
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    throw new Error('Invalid response format');
+  }
+
+  return data.choices[0].message.content.trim();
 };
 
-export const generateVehicleWord = async (minLength: number = 3, maxLength: number = 8): Promise<string> => {
+export const generateVehicleWord = async (
+  minLength: number = 3, 
+  maxLength: number = 8,
+  openRouterIndex: number = 0,
+  groqIndex: number = 0
+): Promise<string> => {
   const history = loadHistory();
   
   const systemMessage: ChatMessage = {
     role: 'system',
-    content: `Você é um especialista em veículos e deve escolher UMA palavra em português relacionada a carros, veículos, peças, marcas ou conceitos automotivos.
+    content: `Você é um especialista em veículos e deve escolher UMA palavra em PORTUGUÊS BRASILEIRO relacionada a carros, veículos, peças, marcas ou conceitos automotivos.
 
 REGRAS OBRIGATÓRIAS:
 - A palavra deve ter entre ${minLength} e ${maxLength} letras
 - Apenas letras (SEM números, SEM traços, SEM espaços)
-- Uma palavra válida em português
-- Relacionada a veículos/carros/automoveis
+- DEVE ser uma palavra VÁLIDA em português brasileiro
+- Relacionada APENAS a veículos/carros/automoveis (ex: LIMPAR não é relacionado mesmo que limpemos os veículos)
+- NÃO use palavras em inglês (ex: CLUTCH é ERRADO, use EMBREAGEM)
+- NÃO use palavras em espanhol (ex: FRENOS é ERRADO, use FREIOS)
 - Responda APENAS com a palavra, nada mais
 
 ${history.usedWords.length > 0 ? `\nPalavras já usadas (NÃO use novamente): ${history.usedWords.join(', ')}` : ''}`,
@@ -218,7 +217,7 @@ ${history.usedWords.length > 0 ? `\nPalavras já usadas (NÃO use novamente): ${
 
   const userMessage: ChatMessage = {
     role: 'user',
-    content: `Escolha uma palavra de veículo com ${minLength} a ${maxLength} letras. Responda apenas a palavra.`,
+    content: `Escolha uma palavra de veículo em português brasileiro com ${minLength} a ${maxLength} letras. Responda apenas a palavra. ${history.usedWords.length > 0 ? `\nPalavras já usadas (NÃO use novamente): ${history.usedWords.join(', ')}` : ''}`,
   };
 
   const messages: ChatMessage[] = [systemMessage];
@@ -231,46 +230,61 @@ ${history.usedWords.length > 0 ? `\nPalavras já usadas (NÃO use novamente): ${
 
   addMessageToHistory('user', userMessage.content);
 
+  let word: string;
+  let nextOpenRouterIndex = openRouterIndex;
+  let nextGroqIndex = groqIndex;
+  
   try {
-    const word = await callOpenRouter(messages);
-    
-    const cleanWord = word
-      .replace(/[^a-záàâãéêíóôõúçA-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/g, '')
-      .toUpperCase()
-      .trim();
-
-    if (cleanWord.length < minLength || cleanWord.length > maxLength) {
-      return generateVehicleWord(minLength, maxLength);
+    if (openRouterIndex < FREE_MODELS.length) {
+      word = await callOpenRouter(messages, openRouterIndex);
+    } else {
+      word = await callGroq(messages, groqIndex);
+      nextGroqIndex++;
     }
-
-    addMessageToHistory('assistant', cleanWord);
-    addWordToHistory(cleanWord);
-
-    return cleanWord;
   } catch (error) {
-    if (error instanceof Error && error.message === 'OPENROUTER_FAILED') {
-      try {
-        const word = await callGroq(messages);
-        
-        const cleanWord = word
-          .replace(/[^a-záàâãéêíóôõúçA-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/g, '')
-          .toUpperCase()
-          .trim();
-
-        if (cleanWord.length < minLength || cleanWord.length > maxLength) {
-          return generateVehicleWord(minLength, maxLength);
-        }
-
-        addMessageToHistory('assistant', cleanWord);
-        addWordToHistory(cleanWord);
-
-        return cleanWord;
-      } catch (groqError) {
-        throw groqError;
-      }
+    if (openRouterIndex < FREE_MODELS.length) {
+      nextOpenRouterIndex++;
+      return generateVehicleWord(minLength, maxLength, nextOpenRouterIndex, groqIndex);
+    } else if (groqIndex < GROQ_MODELS.length) {
+      nextGroqIndex++;
+      return generateVehicleWord(minLength, maxLength, openRouterIndex, nextGroqIndex);
+    } else {
+      throw new Error('Todos os modelos falharam. Tente novamente mais tarde.');
     }
-    throw error;
   }
+
+  const cleanWord = word
+    .replace(/[^a-záàâãéêíóôõúçA-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/g, '')
+    .toUpperCase()
+    .trim();
+
+  if (cleanWord.length < minLength || cleanWord.length > maxLength) {
+    if (openRouterIndex < FREE_MODELS.length) {
+      return generateVehicleWord(minLength, maxLength, openRouterIndex + 1, groqIndex);
+    } else if (groqIndex < GROQ_MODELS.length) {
+      return generateVehicleWord(minLength, maxLength, openRouterIndex, groqIndex + 1);
+    } else {
+      throw new Error('Não foi possível gerar uma palavra válida.');
+    }
+  }
+
+  const { isValidWord } = await import('../data/words');
+  const isValid = await isValidWord(cleanWord, cleanWord.length);
+  
+  if (!isValid) {
+    if (openRouterIndex < FREE_MODELS.length) {
+      return generateVehicleWord(minLength, maxLength, openRouterIndex + 1, groqIndex);
+    } else if (groqIndex < GROQ_MODELS.length) {
+      return generateVehicleWord(minLength, maxLength, openRouterIndex, groqIndex + 1);
+    } else {
+      throw new Error('Não foi possível gerar uma palavra válida.');
+    }
+  }
+
+  addMessageToHistory('assistant', cleanWord);
+  addWordToHistory(cleanWord);
+
+  return cleanWord;
 };
 
 export const resetAIHistory = (): void => {

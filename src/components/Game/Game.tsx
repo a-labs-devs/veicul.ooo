@@ -89,21 +89,29 @@ const Game: React.FC<GameProps> = ({
         return;
       }
 
-      const valid = await isValidWord(gameState.currentGuess, actualWordLength);
-      if (!valid) {
-        showError('Palavra inválida!', 2000);
-        
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
-        
-        setExtendedState(prev => ({
-          ...prev,
-          invalids: [...prev.invalids, gameState.currentGuess],
-        }));
-        return;
+      const normalizedGuess = normalizeWord(gameState.currentGuess);
+      const normalizedTarget = normalizeWord(gameState.target);
+      const isCorrectWord = normalizedGuess === normalizedTarget;
+      let finalGuess = gameState.currentGuess;
+      if (isCorrectWord && finalGuess !== gameState.target) {
+        finalGuess = gameState.target;
+      }
+      if (!isCorrectWord) {
+        const valid = await isValidWord(gameState.currentGuess, actualWordLength);
+        if (!valid) {
+          showError('Palavra inválida!', 2000);
+          
+          setShake(true);
+          setTimeout(() => setShake(false), 500);
+          
+          setExtendedState(prev => ({
+            ...prev,
+            invalids: [...prev.invalids, gameState.currentGuess],
+          }));
+          return;
+        }
       }
 
-      const normalizedGuess = normalizeWord(gameState.currentGuess);
       const alreadyTried = gameState.guesses.some(g => 
         normalizeWord(g.word) === normalizedGuess
       );
@@ -116,9 +124,9 @@ const Game: React.FC<GameProps> = ({
         return;
       }
 
-      const guess = createGuess(gameState.currentGuess, gameState.target);
+      const guess = createGuess(finalGuess, gameState.target);
       const newGuesses = [...gameState.guesses, guess];
-      const isCorrect = normalizeWord(gameState.currentGuess) === normalizeWord(gameState.target);
+      const isCorrect = normalizeWord(finalGuess) === normalizeWord(gameState.target);
       
       let newStatus: 'playing' | 'won' | 'lost' = gameState.gameStatus;
       if (isCorrect) {
@@ -129,7 +137,7 @@ const Game: React.FC<GameProps> = ({
         updateStats(false, newGuesses.length);
       }
 
-      const currentTry = gameState.currentGuess.split('');
+      const currentTry = finalGuess.split('');
       const isGameOver = isCorrect || newGuesses.length >= maxGuesses;
       
       setExtendedState(prev => ({
@@ -182,7 +190,7 @@ const Game: React.FC<GameProps> = ({
         handleKeyPress('ENTER');
       } else if (e.key === 'Backspace') {
         handleKeyPress('⌫');
-      } else if (/^[a-zA-Z]$/.test(e.key)) {
+      } else if (/^[a-záàâãéêíóôõúçA-ZÁÀÂÃÉÊÍÓÔÕÚÇ]$/.test(e.key)) {
         handleKeyPress(e.key.toUpperCase());
       }
     };
